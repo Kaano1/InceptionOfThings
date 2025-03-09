@@ -1,0 +1,37 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+# All Vagrant configuration is done below. The "2" in Vagrant.configure
+# configures the configuration version (we support older styles for
+# backwards compatibility). Please don't change it unless you know what
+# you're doing.
+Vagrant.configure("2") do |config|
+  # The most common configuration options are documented and commented below.
+  # For a complete reference, please see the online documentation at
+  # https://docs.vagrantup.com.
+
+  # Every Vagrant development environment requires a box. You can search for
+  # boxes at https://vagrantcloud.com/search.
+  BOX_NAME = "debian/bookworm64" # Debian 12
+  VM_CPUS = 1
+  VM_RAM = 1024
+
+  # First Machine
+  config.vm.define "ayumusakS" do |server|
+      server.vm.box = BOX_NAME
+      server.vm.hostname = "ayumusakS"
+      server.vm.network "private_network", ip: "192.168.56.110"
+      server.vm.provider "virtualbox" do |settings|
+          settings.memory = VM_RAM
+          settings.cpus = VM_CPUS
+      end
+      server.vm.provision "shell", path: "./scripts/k3s-server.sh"
+      server.vm.provision "shell", inline: <<-SHELL
+        kubectl apply -f /vagrant/app/app1.yaml
+        kubectl apply -f /vagrant/app/app2.yaml
+        kubectl apply -f /vagrant/app/app3.yaml
+        kubectl apply -f /vagrant/app/ingress.yaml
+      SHELL
+  end
+
+end
